@@ -61,3 +61,27 @@ export const putChildren = async (req: NextApiRequest, res: NextApiResponse) => 
     return res.status(500).json({ message: 'Error connecting to MongoDB' });
   }
 };
+
+export const deleteChildren = async (req: NextApiRequest, res: NextApiResponse) => {
+  try {
+    const client = await connectToDatabase();
+    const db = client.db('gimpacto');
+    const { _id } = req.body;
+    if (!_id) {
+      return res.status(400).json({ message: 'ID is required' });
+    }
+
+    const objectId = new ObjectId(_id);
+    const result = await db.collection('children').deleteOne({ _id: objectId });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'Children not found' });
+    }
+
+    return res.status(200).json({ message: 'Children deleted successfully' });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(e);
+    res.status(500).json({ message: 'Error connecting to MongoDB' });
+  }
+};
